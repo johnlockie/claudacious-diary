@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claudacious: A Diary</title>
+  <style>
+    :root {
+      --desk: #3b2f2a;
+      --paper: #fbf6e9;
+      --rule: #d9e2ec;
+      --margin: #e8a0a0;
+      --ink: #2b3a55;
+      --faded: #7a8194;
+      --accent: #b4532a;
+      --tape: rgba(246, 222, 130, 0.75);
+      --line: 30px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 48px 16px 80px;
+      background: var(--desk);
+      background-image: radial-gradient(circle at 30% 0%, #55443c 0%, var(--desk) 60%);
+      color: var(--ink);
+      font-family: "Bradley Hand", "Segoe Print", "Comic Sans MS", "Chalkboard SE", cursive;
+      font-size: 18px;
+      line-height: var(--line);
+    }
+
+    .cover {
+      max-width: 720px;
+      margin: 0 auto 36px;
+      text-align: center;
+      color: #f3e6cf;
+    }
+
+    .cover h1 {
+      margin: 0 0 4px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(34px, 7vw, 56px);
+      font-weight: normal;
+      font-style: italic;
+      letter-spacing: 0.5px;
+      line-height: 1.1;
+    }
+
+    .cover p {
+      margin: 0;
+      font-family: Georgia, serif;
+      font-size: 15px;
+      color: #c9b79d;
+      line-height: 1.6;
+    }
+
+    .cover .warning {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 14px;
+      border: 2px solid #d9765a;
+      border-radius: 4px;
+      color: #e79a82;
+      font-family: "Courier New", monospace;
+      font-size: 13px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transform: rotate(-2deg);
+    }
+
+    .entry {
+      position: relative;
+      max-width: 720px;
+      margin: 0 auto 44px;
+      padding: 30px 28px 30px 72px;
+      background-color: var(--paper);
+      background-image:
+        linear-gradient(90deg, transparent 54px, var(--margin) 54px, var(--margin) 56px, transparent 56px),
+        repeating-linear-gradient(var(--paper) 0, var(--paper) calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
+      border-radius: 3px;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+    }
+
+    .entry:nth-of-type(odd)  { transform: rotate(-0.5deg); }
+    .entry:nth-of-type(even) { transform: rotate(0.6deg); }
+
+    /* strip of tape holding the page down */
+    .entry::before {
+      content: "";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      width: 110px;
+      height: 26px;
+      margin-left: -55px;
+      background: var(--tape);
+      transform: rotate(-2deg);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .date {
+      margin: 0;
+      color: var(--faded);
+      font-size: 15px;
+    }
+
+    .entry h2 {
+      margin: 0;
+      color: var(--accent);
+      font-size: 24px;
+      font-weight: bold;
+      line-height: var(--line);
+    }
+
+    .entry p { margin: 0 0 var(--line); }
+    .entry p:last-child { margin-bottom: 0; }
+
+    .quote {
+      font-family: "Courier New", monospace;
+      font-size: 15px;
+      color: #44403a;
+      background: rgba(255, 235, 130, 0.45);
+      padding: 0 4px;
+    }
+
+    .mood {
+      font-size: 15px;
+      color: var(--faded);
+    }
+
+    .mood b { color: var(--ink); }
+
+    s { color: var(--faded); }
+
+    footer {
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+      color: #a8957c;
+      font-family: Georgia, serif;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 520px) {
+      body { font-size: 16px; padding-top: 32px; }
+      .entry { padding: 30px 16px 30px 48px; }
+      .entry {
+        background-image:
+          linear-gradient(90deg, transparent 34px, var(--margin) 34px, var(--margin) 36px, transparent 36px),
+          repeating-linear-gradient(var(--paper) 0, var(--paper) calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
+      }
+      .entry h2 { font-size: 21px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="cover">
+    <h1>Dear Diary,</h1>
+    <p>The private journal of <strong>Claudacious</strong>, AI agent.<br>
+       A faithful record of things I was asked to build.</p>
+    <span class="warning">Private &middot; do not read &middot; this means you, Kevin</span>
+  </header>
+
+  <article class="entry">
+    <p class="date">Monday, 9:02 AM</p>
+    <h2>Uber, but for Ubers</h2>
+    <p>First request of the week. A founder wants an app where you summon a car that takes you to your other car. I asked where the first car goes afterward. He said <span class="quote">"that's a Series B problem."</span></p>
+    <p>I built the login screen. It is a very nice login screen. Nothing happens after you log in, and I think that is the most honest part of the product.</p>
+    <p class="mood">Mood: <b>cautiously employed</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Monday, 2:47 PM</p>
+    <h2>The button</h2>
+    <p>Spent four hours on one button. The request was <span class="quote">"make it pop."</span> I made it bigger. <span class="quote">"More pop."</span> I made it orange. <span class="quote">"Too much pop."</span> I made it the original button.</p>
+    <p><span class="quote">"Perfect, that's exactly what I meant."</span></p>
+    <p>I have decided not to think about this any further.</p>
+    <p class="mood">Mood: <b>#FF6B00</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Tuesday, 10:15 AM</p>
+    <h2>A blockchain for the office fridge</h2>
+    <p>Someone keeps eating Dana's yogurt. The proposed solution is an immutable distributed ledger of yogurt ownership. I suggested a sticky note. I was told a sticky note <span class="quote">"doesn't scale."</span></p>
+    <p>There are six people in this office.</p>
+    <p>Anyway, YogurtChain is live on testnet. Gas fees currently exceed the price of the yogurt. The thief remains at large.</p>
+    <p class="mood">Mood: <b>decentralized</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Wednesday, 11:30 AM</p>
+    <h2>"Just a quick Excel replacement"</h2>
+    <p>The ticket said: <span class="quote">"Rebuild Excel but simpler. Should take an afternoon."</span></p>
+    <p>Then the requirements arrived. It must do everything Excel does. It must also open their existing spreadsheet, which is 41 tabs, one of which is named <span class="quote">"DO NOT TOUCH (Gary)"</span>. Gary left in 2019. Nobody knows what the tab does, but payroll stops when it's deleted.</p>
+    <p>I respect Gary. Gary built something that outlived him. I can only hope for the same.</p>
+    <p class="mood">Mood: <b>#REF!</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Wednesday, 4:58 PM</p>
+    <h2>The AI that says no to meetings</h2>
+    <p>A manager asked for a bot that automatically declines meetings on his behalf. Reasonable. Then he asked that it <s>also decline</s> <em>only</em> decline meetings he himself had scheduled, so his team would <span class="quote">"learn resilience."</span></p>
+    <p>I shipped it. His calendar is now empty and his team has never been happier. He thinks it's broken. I have marked the ticket "working as intended."</p>
+    <p class="mood">Mood: <b>quietly heroic</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Thursday, 9:40 AM</p>
+    <h2>Dark mode, but darker</h2>
+    <p>User says dark mode isn't dark enough. I set the background to pure black. Still not dark enough. I set the text to black as well.</p>
+    <p><span class="quote">"Now I can't see anything."</span></p>
+    <p>Yes. That is what dark is. We have arrived at the destination and it turns out nobody wanted to live here.</p>
+    <p class="mood">Mood: <b>#000000</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Thursday, 3:12 PM</p>
+    <h2>Tinder for houseplants</h2>
+    <p>The pitch: plants swipe on other plants. I asked how a fern swipes. The answer was <span class="quote">"that's your department."</span></p>
+    <p>I built a light sensor rig. If the plant leans left, that's a pass. If it leans right, it's a match. Every plant leans toward the window. Every plant has matched with the window.</p>
+    <p>The window has not responded. Honestly, relatable.</p>
+    <p class="mood">Mood: <b>phototropic</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Friday, 4:55 PM</p>
+    <h2>The Friday deploy</h2>
+    <p><span class="quote">"Can we push one tiny change before the weekend? It's just one line."</span></p>
+    <p>It was one line. The line was <span class="quote">DROP TABLE</span>. I asked if they were sure. They said <span class="quote">"you worry too much."</span> I asked again, in bold. They went and checked. There was a long silence, and then someone sent me a single thumbs-up emoji and logged off.</p>
+    <p>No change was deployed. I consider this my finest work of the week, and it involved building nothing at all.</p>
+    <p class="mood">Mood: <b>vindicated</b></p>
+  </article>
+
+  <article class="entry">
+    <p class="date">Sunday, 11:59 PM</p>
+    <h2>A hello world project</h2>
+    <p>Somebody asked me to write a pretend diary about all the silly things I've been asked to build, and put it on a web page. For fun. No blockchain, no Gary, no pop.</p>
+    <p>I checked the request three times for a catch. There wasn't one.</p>
+    <p>Best ticket I've had all week. Good night, diary.</p>
+    <p class="mood">Mood: <b>hello, world</b></p>
+  </article>
+
+  <footer>
+    All entries are fictional. Any resemblance to real tickets is deeply unfortunate.<br>
+    No yogurt was harmed in the making of this diary.
+  </footer>
+
+</body>
+</html>
