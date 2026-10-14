@@ -8,14 +8,14 @@
     // Apply the saved theme before first paint so the page never flashes the wrong one.
     try {
       var savedTheme = localStorage.getItem("diary-theme");
-      if (savedTheme === "handwritten" || savedTheme === "typewriter") {
+      if (savedTheme === "handwritten" || savedTheme === "typewriter" || savedTheme === "doogie") {
         document.documentElement.setAttribute("data-theme", savedTheme);
       }
     } catch (e) { /* storage unavailable: fall back to the default theme */ }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=VT323&display=swap">
   <style>
     /* Layout values shared by every theme */
     :root {
@@ -80,6 +80,35 @@
       --ink-blur: 0 0 0.6px rgba(38, 36, 31, 0.55);
     }
 
+    /* Doogie Howser: early-90s PC journal, light grey DOS text on solid blue, nothing but the screen */
+    :root[data-theme="doogie"] {
+      --line: 28px;
+      --desk: #0000aa;
+      --desk-glow: #0000aa;
+      --paper: transparent;
+      --rule: transparent;
+      --margin: transparent;
+      --ink: #d8d8d8;
+      --faded: #aaaaaa;
+      --accent: #ffffff;
+      --tape: transparent;
+      --tape-shadow: none;
+      --cover-ink: #ffffff;
+      --cover-sub: #aaaaaa;
+      --stamp: #d8d8d8;
+      --footer: #aaaaaa;
+      --quote-ink: #ffffff;
+      --quote-bg: transparent;
+      --page-shadow: none;
+      --tilt-odd: 0deg;
+      --tilt-even: 0deg;
+      --body-font: "VT323", "Perfect DOS VGA 437", "Lucida Console", monospace;
+      --display-font: "VT323", "Perfect DOS VGA 437", "Lucida Console", monospace;
+      --mono-font: "VT323", "Perfect DOS VGA 437", "Lucida Console", monospace;
+      --heading-weight: normal;
+      --ink-blur: 0 0 2px rgba(216, 216, 216, 0.35);
+    }
+
     * { box-sizing: border-box; }
 
     body {
@@ -122,6 +151,7 @@
     .theme-switch button:focus-visible { outline: 2px solid #f1ead8; outline-offset: 1px; }
     .theme-switch button[aria-pressed="true"] { background: #f1ead8; color: #26332f; }
     .theme-switch .tw { font-family: "Courier Prime", "Courier New", monospace; }
+    .theme-switch .dh { font: 17px/1 "VT323", monospace; }
 
     .cover {
       max-width: 720px;
@@ -242,6 +272,72 @@
       .entry { padding: 30px 16px 30px 48px; }
       .entry h2 { font-size: 21px; }
     }
+
+    /* Doogie Howser layout: plain text on the screen, a blinking cursor, and an inverse status bar */
+    :root[data-theme="doogie"] body {
+      background-image: none;
+      font-size: 22px;
+      padding-bottom: 96px;
+    }
+
+    :root[data-theme="doogie"] ::selection { background: #aaaaaa; color: #0000aa; }
+
+    :root[data-theme="doogie"] .cover { text-align: left; }
+    :root[data-theme="doogie"] .cover h1 { font-style: normal; letter-spacing: 0; }
+    :root[data-theme="doogie"] .cover p { font-size: 20px; line-height: 1.4; }
+    :root[data-theme="doogie"] .cover .warning { border-radius: 0; font-size: 18px; transform: none; }
+
+    :root[data-theme="doogie"] .entry {
+      margin-bottom: 56px;
+      padding: 0;
+      border-radius: 0;
+    }
+
+    :root[data-theme="doogie"] .entry::before { content: none; }
+    :root[data-theme="doogie"] .date,
+    :root[data-theme="doogie"] .mood,
+    :root[data-theme="doogie"] .quote { font-size: inherit; }
+    :root[data-theme="doogie"] .entry h2 { font-size: 28px; }
+    :root[data-theme="doogie"] footer { font-size: 18px; text-align: left; }
+
+    /* Cursor after the last line of the newest entry (entries run newest-first) */
+    :root[data-theme="doogie"] .entry:first-of-type p:last-child::after {
+      content: "";
+      display: inline-block;
+      width: 0.55em;
+      height: 0.9em;
+      margin-left: 2px;
+      vertical-align: -0.1em;
+      background: var(--ink);
+      animation: dos-cursor 1.06s steps(1) infinite;
+    }
+
+    @keyframes dos-cursor { 50% { visibility: hidden; } }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root[data-theme="doogie"] .entry:first-of-type p:last-child::after { animation: none; }
+    }
+
+    :root[data-theme="doogie"] body::after {
+      content: " C:\\DIARY\\JOURNAL.TXT    Doc 1  Pg 1  Ln 1";
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 5;
+      padding: 2px 8px;
+      background: #aaaaaa;
+      color: #0000aa;
+      font-size: 20px;
+      line-height: 24px;
+      text-shadow: none;
+      white-space: pre;
+      overflow: hidden;
+    }
+
+    @media (max-width: 520px) {
+      :root[data-theme="doogie"] body { font-size: 19px; }
+    }
   </style>
 </head>
 <body>
@@ -249,6 +345,7 @@
   <div class="theme-switch" role="group" aria-label="Diary theme">
     <button type="button" data-theme-choice="handwritten" aria-pressed="true">Hand-written</button>
     <button type="button" class="tw" data-theme-choice="typewriter" aria-pressed="false">Typewriter</button>
+    <button type="button" class="dh" data-theme-choice="doogie" aria-pressed="false">Doogie Howser</button>
   </div>
 
   <header class="cover">
