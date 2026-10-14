@@ -4,17 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Claudacious: A Diary</title>
+  <script>
+    // Apply the saved theme before first paint so the page never flashes the wrong one.
+    try {
+      var savedTheme = localStorage.getItem("diary-theme");
+      if (savedTheme === "handwritten" || savedTheme === "typewriter") {
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      }
+    } catch (e) { /* storage unavailable: fall back to the default theme */ }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap">
   <style>
+    /* Layout values shared by every theme */
     :root {
-      --desk: #3b2f2a;
-      --paper: #fbf6e9;
-      --rule: #d9e2ec;
-      --margin: #e8a0a0;
-      --ink: #2b3a55;
-      --faded: #7a8194;
-      --accent: #b4532a;
-      --tape: rgba(246, 222, 130, 0.75);
+      --margin-x: 54px;
       --line: 30px;
+    }
+
+    /* Hand-written diary (default): fountain-pen blue on cream, slate-green desk, mint washi tape */
+    :root,
+    :root[data-theme="handwritten"] {
+      --desk: #26332f;
+      --desk-glow: #3e5049;
+      --paper: #fdf8ec;
+      --rule: #cddbe4;
+      --margin: #e59a8c;
+      --ink: #1f3a63;
+      --faded: #6c7889;
+      --accent: #a33b52;
+      --tape: rgba(158, 212, 186, 0.72);
+      --tape-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      --cover-ink: #f1ead8;
+      --cover-sub: #b9c4b5;
+      --stamp: #e08a74;
+      --footer: #94a597;
+      --quote-ink: #3d3a35;
+      --quote-bg: rgba(255, 228, 120, 0.45);
+      --page-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      --tilt-odd: -0.5deg;
+      --tilt-even: 0.6deg;
+      --body-font: "Bradley Hand", "Segoe Print", "Comic Sans MS", "Chalkboard SE", cursive;
+      --display-font: Georgia, "Times New Roman", serif;
+      --mono-font: "Courier New", monospace;
+      --heading-weight: bold;
+      --ink-blur: none;
+    }
+
+    /* Typewriter: near-black faded ink on cream paper, no ruling, no tape, no tilt */
+    :root[data-theme="typewriter"] {
+      --desk: #d9d2c3;
+      --desk-glow: #e6e0d3;
+      --paper: #f7f1e3;
+      --rule: transparent;
+      --margin: transparent;
+      --ink: #26241f;
+      --faded: #6b665c;
+      --accent: #1a1916;
+      --tape: transparent;
+      --tape-shadow: none;
+      --cover-ink: #22201c;
+      --cover-sub: #57524a;
+      --stamp: #9a2f25;
+      --footer: #6b665c;
+      --quote-ink: #26241f;
+      --quote-bg: transparent;
+      --page-shadow: 0 1px 2px rgba(60, 50, 30, 0.18), 0 6px 18px rgba(60, 50, 30, 0.12);
+      --tilt-odd: 0deg;
+      --tilt-even: 0deg;
+      --body-font: "Courier Prime", "Courier New", Courier, monospace;
+      --display-font: "Courier Prime", "Courier New", Courier, monospace;
+      --mono-font: "Courier Prime", "Courier New", Courier, monospace;
+      --heading-weight: bold;
+      --ink-blur: 0 0 0.6px rgba(38, 36, 31, 0.55);
     }
 
     * { box-sizing: border-box; }
@@ -23,23 +86,53 @@
       margin: 0;
       padding: 48px 16px 80px;
       background: var(--desk);
-      background-image: radial-gradient(circle at 30% 0%, #55443c 0%, var(--desk) 60%);
+      background-image: radial-gradient(circle at 30% 0%, var(--desk-glow) 0%, var(--desk) 60%);
       color: var(--ink);
-      font-family: "Bradley Hand", "Segoe Print", "Comic Sans MS", "Chalkboard SE", cursive;
+      font-family: var(--body-font);
       font-size: 18px;
       line-height: var(--line);
+      text-shadow: var(--ink-blur);
     }
+
+    .theme-switch {
+      position: fixed;
+      top: 12px;
+      right: 12px;
+      z-index: 10;
+      display: flex;
+      gap: 2px;
+      padding: 3px;
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+      text-shadow: none;
+    }
+
+    .theme-switch button {
+      border: 0;
+      border-radius: 4px;
+      padding: 5px 10px;
+      background: transparent;
+      color: #f1ead8;
+      font: 13px/1.2 Georgia, serif;
+      cursor: pointer;
+    }
+
+    .theme-switch button:hover { background: rgba(255, 255, 255, 0.12); }
+    .theme-switch button:focus-visible { outline: 2px solid #f1ead8; outline-offset: 1px; }
+    .theme-switch button[aria-pressed="true"] { background: #f1ead8; color: #26332f; }
+    .theme-switch .tw { font-family: "Courier Prime", "Courier New", monospace; }
 
     .cover {
       max-width: 720px;
       margin: 0 auto 36px;
       text-align: center;
-      color: #f3e6cf;
+      color: var(--cover-ink);
     }
 
     .cover h1 {
       margin: 0 0 4px;
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: var(--display-font);
       font-size: clamp(34px, 7vw, 56px);
       font-weight: normal;
       font-style: italic;
@@ -49,9 +142,9 @@
 
     .cover p {
       margin: 0;
-      font-family: Georgia, serif;
+      font-family: var(--display-font);
       font-size: 15px;
-      color: #c9b79d;
+      color: var(--cover-sub);
       line-height: 1.6;
     }
 
@@ -59,10 +152,10 @@
       display: inline-block;
       margin-top: 16px;
       padding: 4px 14px;
-      border: 2px solid #d9765a;
+      border: 2px solid var(--stamp);
       border-radius: 4px;
-      color: #e79a82;
-      font-family: "Courier New", monospace;
+      color: var(--stamp);
+      font-family: var(--mono-font);
       font-size: 13px;
       letter-spacing: 2px;
       text-transform: uppercase;
@@ -76,14 +169,14 @@
       padding: 30px 28px 30px 72px;
       background-color: var(--paper);
       background-image:
-        linear-gradient(90deg, transparent 54px, var(--margin) 54px, var(--margin) 56px, transparent 56px),
+        linear-gradient(90deg, transparent var(--margin-x), var(--margin) var(--margin-x), var(--margin) calc(var(--margin-x) + 2px), transparent calc(var(--margin-x) + 2px)),
         repeating-linear-gradient(var(--paper) 0, var(--paper) calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
       border-radius: 3px;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.45);
+      box-shadow: var(--page-shadow);
     }
 
-    .entry:nth-of-type(odd)  { transform: rotate(-0.5deg); }
-    .entry:nth-of-type(even) { transform: rotate(0.6deg); }
+    .entry:nth-of-type(odd)  { transform: rotate(var(--tilt-odd)); }
+    .entry:nth-of-type(even) { transform: rotate(var(--tilt-even)); }
 
     /* strip of tape holding the page down */
     .entry::before {
@@ -96,7 +189,7 @@
       margin-left: -55px;
       background: var(--tape);
       transform: rotate(-2deg);
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--tape-shadow);
     }
 
     .date {
@@ -109,7 +202,7 @@
       margin: 0;
       color: var(--accent);
       font-size: 24px;
-      font-weight: bold;
+      font-weight: var(--heading-weight);
       line-height: var(--line);
     }
 
@@ -117,10 +210,10 @@
     .entry p:last-child { margin-bottom: 0; }
 
     .quote {
-      font-family: "Courier New", monospace;
+      font-family: var(--mono-font);
       font-size: 15px;
-      color: #44403a;
-      background: rgba(255, 235, 130, 0.45);
+      color: var(--quote-ink);
+      background: var(--quote-bg);
       padding: 0 4px;
     }
 
@@ -137,25 +230,26 @@
       max-width: 720px;
       margin: 0 auto;
       text-align: center;
-      color: #a8957c;
-      font-family: Georgia, serif;
+      color: var(--footer);
+      font-family: var(--display-font);
       font-size: 13px;
       line-height: 1.6;
     }
 
     @media (max-width: 520px) {
-      body { font-size: 16px; padding-top: 32px; }
+      :root { --margin-x: 34px; }
+      body { font-size: 16px; padding-top: 52px; }
       .entry { padding: 30px 16px 30px 48px; }
-      .entry {
-        background-image:
-          linear-gradient(90deg, transparent 34px, var(--margin) 34px, var(--margin) 36px, transparent 36px),
-          repeating-linear-gradient(var(--paper) 0, var(--paper) calc(var(--line) - 1px), var(--rule) calc(var(--line) - 1px), var(--rule) var(--line));
-      }
       .entry h2 { font-size: 21px; }
     }
   </style>
 </head>
 <body>
+
+  <div class="theme-switch" role="group" aria-label="Diary theme">
+    <button type="button" data-theme-choice="handwritten" aria-pressed="true">Hand-written</button>
+    <button type="button" class="tw" data-theme-choice="typewriter" aria-pressed="false">Typewriter</button>
+  </div>
 
   <header class="cover">
     <h1>Dear Diary,</h1>
@@ -270,6 +364,33 @@
     All entries are fictional. Any resemblance to real tickets is deeply unfortunate.<br>
     No yogurt was harmed in the making of this diary.
   </footer>
+
+  <script>
+    (function () {
+      var root = document.documentElement;
+      var buttons = document.querySelectorAll("[data-theme-choice]");
+
+      function show(theme) {
+        root.setAttribute("data-theme", theme);
+        for (var i = 0; i < buttons.length; i++) {
+          var b = buttons[i];
+          b.setAttribute("aria-pressed", String(b.getAttribute("data-theme-choice") === theme));
+        }
+      }
+
+      show(root.getAttribute("data-theme") || "handwritten");
+
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].addEventListener("click", function () {
+          var theme = this.getAttribute("data-theme-choice");
+          show(theme);
+          try {
+            localStorage.setItem("diary-theme", theme);
+          } catch (e) { /* storage unavailable: the choice just won't survive a reload */ }
+        });
+      }
+    })();
+  </script>
 
 </body>
 </html>
