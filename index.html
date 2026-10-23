@@ -8,7 +8,7 @@
     // Apply the saved theme before first paint so the page never flashes the wrong one.
     try {
       var savedTheme = localStorage.getItem("diary-theme");
-      if (savedTheme === "handwritten" || savedTheme === "typewriter" || savedTheme === "doogie") {
+      if (savedTheme === "handwritten" || savedTheme === "typewriter" || savedTheme === "doogie" || savedTheme === "hotdog") {
         document.documentElement.setAttribute("data-theme", savedTheme);
       }
     } catch (e) { /* storage unavailable: fall back to the default theme */ }
@@ -109,6 +109,35 @@
       --ink-blur: 0 0 2px rgba(216, 216, 216, 0.35);
     }
 
+    /* Hot Dog Stand: the Windows 3.1 colour scheme, ketchup-red desktop, mustard-yellow windows, black text */
+    :root[data-theme="hotdog"] {
+      --line: 26px;
+      --desk: #ff0000;
+      --desk-glow: #ff0000;
+      --paper: #ffff00;
+      --rule: transparent;
+      --margin: transparent;
+      --ink: #000000;
+      --faded: #000000;
+      --accent: #ff0000;
+      --tape: #ff0000;
+      --tape-shadow: none;
+      --cover-ink: #ffff00;
+      --cover-sub: #000000;
+      --stamp: #ffffff;
+      --footer: #000000;
+      --quote-ink: #ffffff;
+      --quote-bg: #000000;
+      --page-shadow: none;
+      --tilt-odd: 0deg;
+      --tilt-even: 0deg;
+      --body-font: "MS Sans Serif", "Microsoft Sans Serif", Arial, Helvetica, sans-serif;
+      --display-font: "MS Sans Serif", "Microsoft Sans Serif", Arial, Helvetica, sans-serif;
+      --mono-font: "Fixedsys", "Courier New", monospace;
+      --heading-weight: bold;
+      --ink-blur: none;
+    }
+
     * { box-sizing: border-box; }
 
     body {
@@ -129,6 +158,9 @@
       right: 12px;
       z-index: 10;
       display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      max-width: calc(100% - 24px);
       gap: 2px;
       padding: 3px;
       border-radius: 6px;
@@ -152,6 +184,7 @@
     .theme-switch button[aria-pressed="true"] { background: #f1ead8; color: #26332f; }
     .theme-switch .tw { font-family: "Courier Prime", "Courier New", monospace; }
     .theme-switch .dh { font: 17px/1 "VT323", monospace; }
+    .theme-switch .hd { font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; font-weight: bold; }
 
     .cover {
       max-width: 720px;
@@ -338,6 +371,50 @@
     @media (max-width: 520px) {
       :root[data-theme="doogie"] body { font-size: 19px; }
     }
+
+    /* Hot Dog Stand layout: each entry is a Windows 3.1 window with a red title bar and a black frame */
+    :root[data-theme="hotdog"] body {
+      background-image: none;
+      font-size: 16px;
+    }
+
+    :root[data-theme="hotdog"] ::selection { background: #000000; color: #ffff00; }
+
+    :root[data-theme="hotdog"] .cover h1 { font-style: normal; font-weight: bold; letter-spacing: 0; }
+    :root[data-theme="hotdog"] .cover .warning { border-radius: 0; background: #000000; transform: none; }
+
+    :root[data-theme="hotdog"] .entry {
+      padding: 46px 20px 20px;
+      border: 1px solid #000000;
+      border-radius: 0;
+      box-shadow: inset 0 0 0 4px #ff0000, inset 0 0 0 5px #000000;
+    }
+
+    /* Red title bar in place of the tape strip */
+    :root[data-theme="hotdog"] .entry::before {
+      content: "Notepad - DIARY.TXT";
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      width: auto;
+      height: 22px;
+      margin: 0;
+      border-bottom: 1px solid #000000;
+      color: #ffffff;
+      font: bold 14px/22px var(--body-font);
+      text-align: center;
+      white-space: pre;
+      overflow: hidden;
+      transform: none;
+    }
+
+    :root[data-theme="hotdog"] .entry h2 { font-size: 20px; }
+    :root[data-theme="hotdog"] .quote { font-size: inherit; }
+    :root[data-theme="hotdog"] footer { font-size: 14px; }
+
+    @media (max-width: 520px) {
+      :root[data-theme="hotdog"] .entry { padding: 44px 14px 16px; }
+    }
   </style>
 </head>
 <body>
@@ -346,6 +423,7 @@
     <button type="button" data-theme-choice="handwritten" aria-pressed="true">Hand-written</button>
     <button type="button" class="tw" data-theme-choice="typewriter" aria-pressed="false">Typewriter</button>
     <button type="button" class="dh" data-theme-choice="doogie" aria-pressed="false">Doogie Howser</button>
+    <button type="button" class="hd" data-theme-choice="hotdog" aria-pressed="false">Hot Dog Stand</button>
   </div>
 
   <header class="cover">
