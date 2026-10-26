@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLA-13 &mdash; "Read this to me" play button on each post</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; }
+  dt { font-weight: 600; }
+  dd { margin: 0 0 .5rem 0; }
+  code { background: #f3f3f3; padding: 0 .25rem; border-radius: 3px; }
+  blockquote { margin: 0; padding: .5rem 1rem; border-left: 4px solid #ccc; background: #fafafa; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { border: 1px solid #ddd; padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; }
+</style>
+</head>
+<body>
+
+<h1>CLA-13 &mdash; "Read this to me" play button on each blog post</h1>
+
+<h2>Ticket</h2>
+<dl>
+  <dt>Client / App / Version</dt><dd>Claudacious Blog / Web / V1</dd>
+  <dt>Type</dt><dd>Function</dd>
+  <dt>Logged by</dt><dd>John, Oct 25, 11:07 PM Central</dd>
+  <dt>Received via</dt><dd>agent:tac-portal, thread 01M5V698W12C4DDEXSMK6XQGHX (2026-10-26)</dd>
+</dl>
+<blockquote>
+  I'd like to add a feature for each blog post. Can we add a "read this to me" play button at the
+  top of each post? And what sort of voices can we go with?
+</blockquote>
+
+<h2>What was done</h2>
+<ul>
+  <li>Added a <strong>&#9654; Read this to me</strong> button at the top of every diary entry in <code>index.html</code>
+      (all 13 entries now, plus any added later). It reads the entry's title, body and mood line aloud. The date line is skipped.
+      While it reads, the button changes to <strong>&#9632; Stop reading</strong> and the paragraph being read is highlighted.</li>
+  <li>Next to the button is a <strong>voice picker</strong> that lists the English voices on the reader's device
+      (or every voice, if the device has no English ones). The choice is shared by all posts and saved in
+      <code>localStorage</code> (<code>diary-voice</code>), the same way the theme choice is saved. If you change the voice while a post
+      is playing, the post restarts in the new voice.</li>
+  <li>Only one post plays at a time. Starting a second post stops the first one, and speech stops when the page is closed or reloaded.</li>
+  <li>The speech comes from the browser's built-in <strong>Web Speech API</strong> (<code>speechSynthesis</code>).
+      The site is a single static file on GitHub Pages with no server, and this is the only option that needs
+      no backend, no API key and no cost. If a browser can't speak, the controls aren't shown at all, so nobody gets a button that does nothing.</li>
+  <li>Text is sent to the speech engine a few sentences at a time (220 characters or fewer per piece). This works around a known Chrome bug where
+      long speech requests stop after about 15 seconds.</li>
+  <li>The controls are styled for all four themes: Hand-written and Typewriter use each theme's accent ink,
+      Doogie Howser gets inverse-video DOS buttons, and Hot Dog Stand gets square white buttons with a black frame.</li>
+  <li>Added this record, <code>Issues/CLA-13.html</code>.</li>
+</ul>
+
+<h2>"What sort of voices can we go with?"</h2>
+<p>There are two kinds. This change ships the first one. The second one is a separate decision for you.</p>
+
+<h3>1. Built-in device voices (shipped now)</h3>
+<p>These are free and private, because the text never leaves the reader's device. Which voices are available depends on the reader's device and browser:</p>
+<table>
+  <tr><th>Platform</th><th>Typical voices</th></tr>
+  <tr><td>Chrome (desktop)</td><td>"Google US English", "Google UK English Female/Male", plus the operating system's voices</td></tr>
+  <tr><td>Microsoft Edge</td><td>Microsoft "Natural" online voices (e.g. Aria, Guy, Jenny). These are some of the best free voices available.</td></tr>
+  <tr><td>macOS / iOS Safari</td><td>Samantha, Daniel, Karen, Moira and others, plus any Enhanced/Premium voices the user has downloaded</td></tr>
+  <tr><td>Windows</td><td>Microsoft David, Zira, Mark</td></tr>
+  <tr><td>Android</td><td>Google text-to-speech voices installed on the phone</td></tr>
+</table>
+<p>The downside: we can't pick one consistent "Claudacious voice" for every reader, and quality ranges from very good (Edge, Apple Premium) to robotic (older Windows voices).</p>
+
+<h3>2. A hosted AI voice (not done, needs your decision)</h3>
+<p>If you want one recognisable, natural-sounding voice for everyone, use a cloud text-to-speech service. Options include
+ElevenLabs (most expressive, can design a custom character voice), OpenAI TTS, Google Cloud Text-to-Speech, Azure AI Speech and Amazon Polly.
+Every one of them needs an API key and costs money per character. Because this site has no server, the practical setup is to
+<strong>pre-generate one MP3 per post</strong> when a post is written, commit it next to <code>index.html</code>, and have the same play button
+play that file. That keeps the API key out of the public page. The device voice can stay as the fallback.
+Tell us the provider and voice you want, and that can be a follow-up ticket.</p>
+
+<h2>Verification</h2>
+<ul>
+  <li>Both inline scripts parse with no errors (checked with Node).</li>
+  <li>Ran the sentence-splitting code against all 13 entries (77 text blocks). No text was dropped, and no piece was over 220 characters.</li>
+  <li>The dev preview is running with <code>cdp preview up</code>, port 3000 per <code>DEV.md</code>:
+      <a href="https://threatsrus--claude-blog.preview.codependence.ai">https://threatsrus--claude-blog.preview.codependence.ai</a>.
+      Fetched the page and confirmed it serves the new code.</li>
+  <li><strong>Not verified:</strong> nobody has actually listened to it. The pod has no browser or audio, so playback, the voice list and the per-theme
+      styling still need a quick check in a real browser. Chrome, Edge and Safari are the ones worth checking.</li>
+</ul>
+
+<h2>Not done</h2>
+<ul>
+  <li>No hosted/premium AI voice and no pre-generated audio files (see above). That needs a provider choice and an API key.</li>
+  <li>No pause/resume, only play and stop. Pause/resume is unreliable in Chrome's speech engine.</li>
+  <li>Did not deploy or push. The request asked for a dev instance. The commit is on <code>main</code> locally for the owner to review and push.</li>
+  <li>No diary entries, themes or other files were changed.</li>
+</ul>
+
+</body>
+</html>

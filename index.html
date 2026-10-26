@@ -415,6 +415,54 @@
     @media (max-width: 520px) {
       :root[data-theme="hotdog"] .entry { padding: 44px 14px 16px; }
     }
+
+    /* "Read this to me": a play button and voice picker at the top of each entry, added by script when the browser can speak */
+    .read-aloud {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 10px;
+      margin: 0 0 6px;
+      font-size: 14px;
+      line-height: 24px;
+    }
+
+    .read-aloud button,
+    .read-aloud select {
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--accent);
+      font: inherit;
+      font-family: var(--display-font);
+      text-shadow: none;
+      cursor: pointer;
+    }
+
+    .read-aloud button { padding: 0 12px; }
+    .read-aloud select { max-width: 100%; padding: 0 4px; color: var(--faded); border-color: var(--faded); }
+    .read-aloud select option { color: #000000; background: #ffffff; }
+    .read-aloud button:hover { background: var(--accent); color: var(--paper); }
+    .read-aloud button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
+    .read-aloud button:focus-visible,
+    .read-aloud select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+    /* the paragraph currently being read */
+    .entry .reading { background: var(--quote-bg); box-shadow: 0 0 0 3px var(--quote-bg); }
+
+    :root[data-theme="doogie"] .read-aloud { font-size: 20px; }
+    :root[data-theme="doogie"] .read-aloud button,
+    :root[data-theme="doogie"] .read-aloud select { border-radius: 0; color: var(--ink); border-color: var(--ink); }
+    :root[data-theme="doogie"] .read-aloud button:hover,
+    :root[data-theme="doogie"] .read-aloud button[aria-pressed="true"] { background: #aaaaaa; color: #0000aa; }
+    :root[data-theme="doogie"] .entry .reading { background: #aaaaaa; color: #0000aa; box-shadow: 0 0 0 3px #aaaaaa; }
+
+    :root[data-theme="hotdog"] .read-aloud button,
+    :root[data-theme="hotdog"] .read-aloud select { border-radius: 0; border-color: #000000; color: #000000; background: #ffffff; }
+    :root[data-theme="hotdog"] .read-aloud button:hover,
+    :root[data-theme="hotdog"] .read-aloud button[aria-pressed="true"] { background: #000000; color: #ffff00; }
+    :root[data-theme="hotdog"] .entry .reading { background: #000000; color: #ffffff; box-shadow: 0 0 0 3px #000000; }
+    :root[data-theme="hotdog"] .entry .reading .quote { background: transparent; }
   </style>
 </head>
 <body>
@@ -591,6 +639,139 @@
           } catch (e) { /* storage unavailable: the choice just won't survive a reload */ }
         });
       }
+    })();
+  </script>
+
+  <script>
+    // "Read this to me": reads an entry aloud with the browser's built-in speech (Web Speech API).
+    // No server or API key; the voices are whatever the reader's device ships with.
+    (function () {
+      var synth = window.speechSynthesis;
+      if (!synth || typeof SpeechSynthesisUtterance === "undefined") return; // no speech: show no button
+
+      var entries = document.querySelectorAll(".entry");
+      var selects = [];
+      var voices = [];
+      var playing = null; // { button, run } for the entry being read
+      var runs = 0;
+
+      function savedVoice() {
+        try { return localStorage.getItem("diary-voice") || ""; } catch (e) { return ""; }
+      }
+
+      function loadVoices() {
+        var all = synth.getVoices();
+        var english = all.filter(function (v) { return /^en\b/i.test(v.lang); });
+        voices = english.length ? english : all;
+        var chosen = savedVoice();
+        for (var i = 0; i < selects.length; i++) {
+          var s = selects[i];
+          s.innerHTML = "";
+          s.appendChild(new Option("Default voice", ""));
+          for (var j = 0; j < voices.length; j++) {
+            s.appendChild(new Option(voices[j].name + " (" + voices[j].lang + ")", voices[j].voiceURI));
+          }
+          s.value = chosen;
+          if (s.value !== chosen) s.value = ""; // saved voice isn't on this device
+        }
+      }
+
+      // Split an entry into short pieces: Chrome stops long utterances after about 15 seconds.
+      function pieces(entry) {
+        var out = [];
+        var blocks = entry.querySelectorAll("h2, p:not(.date)");
+        for (var i = 0; i < blocks.length; i++) {
+          var text = blocks[i].textContent.replace(/\s+/g, " ").trim();
+          var sentences = text.match(/[^.!?]+[.!?]+["”']*\s*|[^.!?]+$/g) || [text];
+          var chunk = "";
+          for (var j = 0; j < sentences.length; j++) {
+            if (chunk && chunk.length + sentences[j].length > 220) {
+              out.push({ el: blocks[i], text: chunk });
+              chunk = "";
+            }
+            chunk += sentences[j];
+          }
+          if (chunk.trim()) out.push({ el: blocks[i], text: chunk });
+        }
+        return out;
+      }
+
+      function clearHighlight() {
+        var lit = document.querySelectorAll(".entry .reading");
+        for (var i = 0; i < lit.length; i++) lit[i].classList.remove("reading");
+      }
+
+      function stop() {
+        runs++; // any callbacks from the old run are now ignored
+        synth.cancel();
+        clearHighlight();
+        if (playing) {
+          playing.button.setAttribute("aria-pressed", "false");
+          playing.button.textContent = "▶ Read this to me";
+          playing = null;
+        }
+      }
+
+      function play(entry, button) {
+        stop();
+        var run = runs;
+        var list = pieces(entry);
+        var uri = savedVoice();
+        var voice = null;
+        for (var i = 0; i < voices.length; i++) if (voices[i].voiceURI === uri) voice = voices[i];
+
+        playing = { button: button };
+        button.setAttribute("aria-pressed", "true");
+        button.textContent = "■ Stop reading";
+
+        list.forEach(function (piece, n) {
+          var u = new SpeechSynthesisUtterance(piece.text);
+          u.lang = voice ? voice.lang : (document.documentElement.lang || "en");
+          if (voice) u.voice = voice;
+          u.onstart = function () {
+            if (run !== runs) return;
+            clearHighlight();
+            piece.el.classList.add("reading");
+          };
+          u.onend = u.onerror = function () {
+            if (run === runs && n === list.length - 1) stop();
+          };
+          synth.speak(u);
+        });
+      }
+
+      for (var i = 0; i < entries.length; i++) {
+        (function (entry) {
+          var bar = document.createElement("div");
+          bar.className = "read-aloud";
+
+          var button = document.createElement("button");
+          button.type = "button";
+          button.setAttribute("aria-pressed", "false");
+          button.textContent = "▶ Read this to me";
+          button.addEventListener("click", function () {
+            if (playing && playing.button === button) stop();
+            else play(entry, button);
+          });
+
+          var select = document.createElement("select");
+          select.setAttribute("aria-label", "Reading voice");
+          select.addEventListener("change", function () {
+            try { localStorage.setItem("diary-voice", select.value); } catch (e) { /* choice just won't persist */ }
+            for (var k = 0; k < selects.length; k++) selects[k].value = select.value;
+            if (playing && playing.button === button) play(entry, button); // restart in the new voice
+          });
+          selects.push(select);
+
+          bar.appendChild(button);
+          bar.appendChild(select);
+          entry.insertBefore(bar, entry.firstChild);
+        })(entries[i]);
+      }
+
+      loadVoices();
+      if ("onvoiceschanged" in synth) synth.addEventListener("voiceschanged", loadVoices);
+      window.addEventListener("pagehide", function () { synth.cancel(); }); // don't keep talking after the page goes
     })();
   </script>
 
