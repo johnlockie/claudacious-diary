@@ -186,9 +186,8 @@
       right: 12px;
       z-index: 10;
       display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      max-width: calc(100% - 24px);
+      flex-direction: column;
+      align-items: stretch;
       gap: 2px;
       padding: 3px;
       border-radius: 6px;
@@ -203,6 +202,7 @@
       padding: 5px 10px;
       background: transparent;
       color: #f1ead8;
+      text-align: left;
       font: 13px/1.2 Georgia, serif;
       cursor: pointer;
     }
@@ -576,13 +576,16 @@
       :root[data-theme="space"] .entry h2 { font-size: 18px; }
     }
 
-    /* "Read this to me": a play button and voice picker at the top of each entry, added by script when the browser can speak */
+    /* "Read this to me": a lips button and voice picker floated to the top right of each entry, added by script when the browser can speak */
     .read-aloud {
+      position: relative; /* sit above the page's ruled lines */
+      z-index: 1;
+      float: right;
       display: flex;
-      flex-wrap: wrap;
       align-items: center;
-      gap: 6px 10px;
-      margin: 0 0 6px;
+      gap: 6px;
+      max-width: 55%;
+      margin: 0 0 6px 12px;
       font-size: 14px;
       line-height: 24px;
     }
@@ -599,8 +602,8 @@
       cursor: pointer;
     }
 
-    .read-aloud button { padding: 0 12px; }
-    .read-aloud select { max-width: 100%; padding: 0 4px; color: var(--faded); border-color: var(--faded); }
+    .read-aloud button { flex: none; padding: 0 8px; font-size: 18px; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif; }
+    .read-aloud select { min-width: 0; max-width: 100%; padding: 0 4px; color: var(--faded); border-color: var(--faded); }
     .read-aloud select option { color: #000000; background: #ffffff; }
     .read-aloud button:hover { background: var(--accent); color: var(--paper); }
     .read-aloud button[aria-pressed="true"] { background: var(--accent); color: var(--paper); }
@@ -611,6 +614,7 @@
     .entry .reading { background: var(--quote-bg); box-shadow: 0 0 0 3px var(--quote-bg); }
 
     :root[data-theme="doogie"] .read-aloud { font-size: 20px; }
+    :root[data-theme="doogie"] .read-aloud button { font-size: 18px; }
     :root[data-theme="doogie"] .read-aloud button,
     :root[data-theme="doogie"] .read-aloud select { border-radius: 0; color: var(--ink); border-color: var(--ink); }
     :root[data-theme="doogie"] .read-aloud button:hover,
@@ -822,6 +826,7 @@
       var voices = [];
       var playing = null; // { button, run } for the entry being read
       var runs = 0;
+      var LIPS = "\uD83D\uDC44"; // 👄 human lips emoji
 
       function savedVoice() {
         try { return localStorage.getItem("diary-voice") || ""; } catch (e) { return ""; }
@@ -905,7 +910,9 @@
         if (playing) {
           clearInterval(playing.timer);
           playing.button.setAttribute("aria-pressed", "false");
-          playing.button.textContent = "▶ Read this to me";
+          playing.button.textContent = LIPS;
+          playing.button.setAttribute("aria-label", "Read this to me");
+          playing.button.title = "Read this to me";
           playing = null;
         }
         return wasBusy;
@@ -925,7 +932,9 @@
 
         var state = playing = { button: button, utterance: null, next: 0, ticks: 0 };
         button.setAttribute("aria-pressed", "true");
-        button.textContent = "■ Stop reading";
+        button.textContent = "■";
+        button.setAttribute("aria-label", "Stop reading");
+        button.title = "Stop reading";
 
         function speakNext() {
           if (run !== runs) return;
@@ -974,7 +983,9 @@
           var button = document.createElement("button");
           button.type = "button";
           button.setAttribute("aria-pressed", "false");
-          button.textContent = "▶ Read this to me";
+          button.textContent = LIPS;
+          button.setAttribute("aria-label", "Read this to me");
+          button.title = "Read this to me";
           button.addEventListener("click", function () {
             if (playing && playing.button === button) stop();
             else play(entry, button);

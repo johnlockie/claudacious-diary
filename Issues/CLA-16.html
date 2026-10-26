@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLA-16 &mdash; Vertical floating theme selector, lips "Read this to me" button at top right</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; }
+  dt { font-weight: 600; }
+  dd { margin: 0 0 .5rem 0; }
+  code { background: #f3f3f3; padding: 0 .25rem; border-radius: 3px; }
+  blockquote { margin: 0; padding: .5rem 1rem; border-left: 4px solid #ccc; background: #fafafa; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { border: 1px solid #ddd; padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; }
+</style>
+</head>
+<body>
+
+<h1>CLA-16 &mdash; Vertical floating theme selector, lips "Read this to me" button at top right</h1>
+
+<h2>Ticket</h2>
+<dl>
+  <dt>Client / App / Version</dt><dd>Claudacious Blog / Web / V1</dd>
+  <dt>Type</dt><dd>Function</dd>
+  <dt>Logged by</dt><dd>John, Oct 26, 4:53 PM Central</dd>
+  <dt>Received via</dt><dd>agent:tac-portal, thread 01M5X38QB8G320143BK0CAJE4F (2026-10-26)</dd>
+</dl>
+<blockquote>
+  Please stack the theme selector vertically instead of horizontally. It should float and not scroll with the rest of the site.
+  Also, move the "Read this to me" button to the top right of each post, and instead of a "PLAY" button, use a lips icon
+  (human lips, emoji or something like that).
+</blockquote>
+
+<h2>What was done</h2>
+<table>
+  <tr><th>Ask</th><th>Before</th><th>After</th></tr>
+  <tr>
+    <td>Stack the theme selector vertically</td>
+    <td>The five theme buttons sat side by side in one row (wrapping onto more rows on narrow screens).</td>
+    <td>The buttons are stacked in one column, one theme per row, all the same width, with their labels left-aligned.</td>
+  </tr>
+  <tr>
+    <td>It should float and not scroll</td>
+    <td>The selector was already pinned (<code>position: fixed</code>) to the top-right corner of the window.</td>
+    <td>No change needed. It stays pinned to the top-right corner and floats over the page while the posts scroll underneath it.</td>
+  </tr>
+  <tr>
+    <td>Move "Read this to me" to the top right of each post</td>
+    <td>The play button and voice picker sat in a row at the top left of each post, above the date.</td>
+    <td>The button and voice picker now sit in the top-right corner of each post. The date and title flow beside them on the left.
+        The voice picker is still next to the button, so the reader can still choose a voice.</td>
+  </tr>
+  <tr>
+    <td>Lips icon instead of "PLAY"</td>
+    <td>The button read <strong>&#9654; Read this to me</strong>, and <strong>&#9632; Stop reading</strong> while reading.</td>
+    <td>The button is now a lips emoji, <strong>&#128068;</strong>. While a post is being read it changes to <strong>&#9632;</strong>
+        (stop) and stays highlighted, the same way it did before. Click it again to stop.</td>
+  </tr>
+</table>
+
+<h2>What was changed</h2>
+<ul>
+  <li><code>index.html</code>:
+    <ul>
+      <li><code>.theme-switch</code>: changed from a wrapping row to a single column (<code>flex-direction: column</code>). It was already
+          <code>position: fixed</code>. Its buttons are left-aligned so the labels line up.</li>
+      <li><code>.read-aloud</code>: the control bar now floats to the right at the top of each entry. It is capped at 55% of the entry's
+          width so the date and title still have room on a phone, and the voice picker shrinks to fit.</li>
+      <li>The read-aloud button shows &#128068; (U+1F444, "mouth") and uses the system emoji font so it shows in colour.
+          It has an <code>aria-label</code> and a tooltip of "Read this to me", or "Stop reading" while reading,
+          so screen readers and mouse hover still say what it does now that the button has no words.</li>
+      <li>Doogie Howser theme: set the lips button size so it isn't oversized at that theme's larger text size.</li>
+    </ul>
+  </li>
+  <li>Added this record, <code>Issues/CLA-16.html</code>.</li>
+  <li>The reading itself (voices, how a post is split up and spoken, highlighting) did not change. No themes or entry text changed either.</li>
+</ul>
+
+<h2>Verification</h2>
+<ul>
+  <li>All three inline scripts in <code>index.html</code> still parse with no errors, and the stylesheet's braces balance (checked with Node).</li>
+  <li>The dev preview is running with <code>cdp preview up</code>, port 3000 per <code>DEV.md</code>:
+      <a href="https://threatsrus--claude-blog.preview.codependence.ai">https://threatsrus--claude-blog.preview.codependence.ai</a>.
+      Checked that the local server serves the updated page.</li>
+  <li><strong>Not verified:</strong> nobody has looked at it in a real browser. The pod has no browser, so I couldn't take a screenshot.
+      Please open the preview and check, on desktop and on a phone, in every theme:
+      the stacked selector, the lips button in each post's top-right corner, and that reading starts and stops.</li>
+  <li>On a narrow phone screen the stacked selector is taller than the old row (about 5 buttons high), so it covers a bit more of the
+      right edge of the page as the posts scroll under it. That comes with stacking it and keeping it floating. If it gets in the way,
+      it could be made collapsible or semi-transparent on phones.</li>
+</ul>
+
+<h2>Not done</h2>
+<ul>
+  <li><strong>Not deployed to prod.</strong> The request said "Deploy to prod." Here, deploying means <code>git push origin main</code>
+      (see <code>deploy.md</code>), and this job's rules forbid pushing or touching a remote. The fix is committed on local
+      <code>main</code>. To ship it, the owner can review the commit and run <code>git push origin main</code>. GitHub Pages republishes in a minute or two.</li>
+  <li>The voice picker was not turned into an icon or hidden. The ticket only covered the play button, so the picker moved to the
+      top right with the button and otherwise stayed the same.</li>
+  <li>The stop state uses &#9632; and not a second lips icon, so it's clear that clicking stops the reading. If you want lips in both states, it's a one-line change.</li>
+</ul>
+
+</body>
+</html>
