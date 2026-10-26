@@ -8,14 +8,14 @@
     // Apply the saved theme before first paint so the page never flashes the wrong one.
     try {
       var savedTheme = localStorage.getItem("diary-theme");
-      if (savedTheme === "handwritten" || savedTheme === "typewriter" || savedTheme === "doogie" || savedTheme === "hotdog") {
+      if (savedTheme === "handwritten" || savedTheme === "typewriter" || savedTheme === "doogie" || savedTheme === "hotdog" || savedTheme === "space") {
         document.documentElement.setAttribute("data-theme", savedTheme);
       }
     } catch (e) { /* storage unavailable: fall back to the default theme */ }
   </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=VT323&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=VT323&family=Orbitron:wght@500;700&family=Exo+2:ital,wght@0,400;0,600;1,400&display=swap">
   <style>
     /* Layout values shared by every theme */
     :root {
@@ -138,6 +138,34 @@
       --ink-blur: none;
     }
 
+    /* Space: deep-space navy under a starfield, glassy neon-edged panels, cyan headings, magenta highlights */
+    :root[data-theme="space"] {
+      --desk: #05060f;
+      --desk-glow: #1d0f3d;
+      --paper: rgba(12, 14, 36, 0.82);
+      --rule: transparent;
+      --margin: transparent;
+      --ink: #e4e6ff;
+      --faded: #9aa2d9;
+      --accent: #3ff4ff;
+      --tape: linear-gradient(90deg, #ff3df0, #8a5cff, #3ff4ff);
+      --tape-shadow: 0 0 12px rgba(138, 92, 255, 0.8);
+      --cover-ink: #f2f3ff;
+      --cover-sub: #a9b0e8;
+      --stamp: #ff3df0;
+      --footer: #8189c4;
+      --quote-ink: #ffd9fb;
+      --quote-bg: rgba(255, 61, 240, 0.2);
+      --page-shadow: 0 0 0 1px rgba(63, 244, 255, 0.35), 0 0 22px rgba(63, 244, 255, 0.18), 0 0 60px rgba(138, 92, 255, 0.22);
+      --tilt-odd: 0deg;
+      --tilt-even: 0deg;
+      --body-font: "Exo 2", "Segoe UI", system-ui, sans-serif;
+      --display-font: "Orbitron", "Exo 2", "Segoe UI", sans-serif;
+      --mono-font: "Exo 2", "Segoe UI", system-ui, sans-serif;
+      --heading-weight: 700;
+      --ink-blur: none;
+    }
+
     * { box-sizing: border-box; }
 
     body {
@@ -185,6 +213,8 @@
     .theme-switch .tw { font-family: "Courier Prime", "Courier New", monospace; }
     .theme-switch .dh { font: 17px/1 "VT323", monospace; }
     .theme-switch .hd { font-family: "MS Sans Serif", "Microsoft Sans Serif", Arial, sans-serif; font-weight: bold; }
+    .theme-switch .sp { font: 600 12px/1.2 "Orbitron", sans-serif; letter-spacing: 1px; text-transform: uppercase; color: #3ff4ff; }
+    .theme-switch .sp[aria-pressed="true"] { background: #3ff4ff; color: #05060f; }
 
     .cover {
       max-width: 720px;
@@ -416,6 +446,136 @@
       :root[data-theme="hotdog"] .entry { padding: 44px 14px 16px; }
     }
 
+    /* Space layout: a fixed starfield and nebula behind everything, entries as glowing glass panels with a "Captain's log" badge */
+    :root[data-theme="space"] body {
+      background-image: none;
+      font-size: 17px;
+    }
+
+    :root[data-theme="space"] ::selection { background: #ff3df0; color: #05060f; }
+
+    /* Two tiled star layers and three nebula clouds; the second layer of brighter stars twinkles */
+    :root[data-theme="space"] body::before,
+    :root[data-theme="space"] body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    :root[data-theme="space"] body::before {
+      background-color: var(--desk);
+      background-image:
+        radial-gradient(1px 1px at 23px 41px, #ffffff, transparent),
+        radial-gradient(1px 1px at 141px 97px, rgba(255, 255, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 87px 173px, rgba(200, 220, 255, 0.9), transparent),
+        radial-gradient(1px 1px at 199px 13px, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(1px 1px at 61px 229px, rgba(255, 220, 250, 0.8), transparent),
+        radial-gradient(1px 1px at 251px 151px, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(1px 1px at 311px 59px, rgba(200, 240, 255, 0.8), transparent),
+        radial-gradient(1px 1px at 173px 283px, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(ellipse 45% 35% at 85% 12%, rgba(138, 92, 255, 0.28), transparent 70%),
+        radial-gradient(ellipse 40% 30% at 8% 55%, rgba(255, 61, 240, 0.16), transparent 70%),
+        radial-gradient(ellipse 50% 35% at 70% 95%, rgba(63, 244, 255, 0.12), transparent 70%);
+      background-size:
+        340px 320px, 340px 320px, 340px 320px, 340px 320px,
+        340px 320px, 340px 320px, 340px 320px, 340px 320px,
+        100% 100%, 100% 100%, 100% 100%;
+      background-repeat: repeat, repeat, repeat, repeat, repeat, repeat, repeat, repeat, no-repeat, no-repeat, no-repeat;
+    }
+
+    :root[data-theme="space"] body::after {
+      background-image:
+        radial-gradient(1.5px 1.5px at 47px 83px, #ffffff, transparent),
+        radial-gradient(1.5px 1.5px at 389px 211px, #b9f9ff, transparent),
+        radial-gradient(2px 2px at 271px 419px, #ffffff, transparent),
+        radial-gradient(1.5px 1.5px at 503px 37px, #ffd9fb, transparent),
+        radial-gradient(2px 2px at 151px 487px, #ffffff, transparent);
+      background-size: 560px 540px;
+      animation: space-twinkle 4.5s ease-in-out infinite alternate;
+    }
+
+    @keyframes space-twinkle {
+      from { opacity: 1; }
+      to { opacity: 0.25; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root[data-theme="space"] body::after { animation: none; }
+    }
+
+    :root[data-theme="space"] .cover h1 {
+      font-style: normal;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #3ff4ff, #8a5cff 50%, #ff3df0);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 14px rgba(138, 92, 255, 0.6));
+    }
+
+    :root[data-theme="space"] .cover p { font-family: var(--body-font); font-size: 16px; }
+
+    :root[data-theme="space"] .cover .warning {
+      border-radius: 999px;
+      font-family: var(--display-font);
+      font-size: 11px;
+      transform: none;
+      box-shadow: 0 0 10px rgba(255, 61, 240, 0.6), inset 0 0 8px rgba(255, 61, 240, 0.35);
+      text-shadow: 0 0 6px rgba(255, 61, 240, 0.8);
+    }
+
+    :root[data-theme="space"] .entry {
+      padding: 38px 32px 30px;
+      background-image: none;
+      border-radius: 14px;
+      -webkit-backdrop-filter: blur(3px);
+      backdrop-filter: blur(3px);
+    }
+
+    /* Neon "Captain's log" badge in place of the tape strip */
+    :root[data-theme="space"] .entry::before {
+      content: "\2726  Captain\2019s log  \2726";
+      top: -12px;
+      width: auto;
+      height: 24px;
+      margin: 0;
+      padding: 0 16px;
+      border-radius: 999px;
+      color: #05060f;
+      font: 700 10px/24px var(--display-font);
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      white-space: pre;
+      transform: translateX(-50%);
+    }
+
+    :root[data-theme="space"] .date {
+      font-family: var(--display-font);
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    :root[data-theme="space"] .entry h2 {
+      font-family: var(--display-font);
+      font-size: 21px;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(63, 244, 255, 0.7), 0 0 22px rgba(63, 244, 255, 0.35);
+    }
+
+    :root[data-theme="space"] .quote { font-size: inherit; border-radius: 3px; }
+    :root[data-theme="space"] .mood b { color: #ff3df0; text-shadow: 0 0 8px rgba(255, 61, 240, 0.6); }
+    :root[data-theme="space"] footer { font-family: var(--body-font); font-size: 14px; }
+
+    @media (max-width: 520px) {
+      :root[data-theme="space"] .entry { padding: 36px 18px 24px; }
+      :root[data-theme="space"] .entry h2 { font-size: 18px; }
+    }
+
     /* "Read this to me": a play button and voice picker at the top of each entry, added by script when the browser can speak */
     .read-aloud {
       display: flex;
@@ -463,6 +623,13 @@
     :root[data-theme="hotdog"] .read-aloud button[aria-pressed="true"] { background: #000000; color: #ffff00; }
     :root[data-theme="hotdog"] .entry .reading { background: #000000; color: #ffffff; box-shadow: 0 0 0 3px #000000; }
     :root[data-theme="hotdog"] .entry .reading .quote { background: transparent; }
+
+    :root[data-theme="space"] .read-aloud button,
+    :root[data-theme="space"] .read-aloud select { border-radius: 999px; font-family: var(--body-font); }
+    :root[data-theme="space"] .read-aloud button { box-shadow: 0 0 8px rgba(63, 244, 255, 0.35); }
+    :root[data-theme="space"] .read-aloud select { background: rgba(5, 6, 15, 0.6); }
+    :root[data-theme="space"] .read-aloud button:hover,
+    :root[data-theme="space"] .read-aloud button[aria-pressed="true"] { color: #05060f; box-shadow: 0 0 14px rgba(63, 244, 255, 0.7); }
   </style>
 </head>
 <body>
@@ -472,6 +639,7 @@
     <button type="button" class="tw" data-theme-choice="typewriter" aria-pressed="false">Typewriter</button>
     <button type="button" class="dh" data-theme-choice="doogie" aria-pressed="false">Doogie Howser</button>
     <button type="button" class="hd" data-theme-choice="hotdog" aria-pressed="false">Hot Dog Stand</button>
+    <button type="button" class="sp" data-theme-choice="space" aria-pressed="false">Space</button>
   </div>
 
   <header class="cover">

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLA-15 &mdash; New "Space" theme for the blog</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; }
+  dt { font-weight: 600; }
+  dd { margin: 0 0 .5rem 0; }
+  code { background: #f3f3f3; padding: 0 .25rem; border-radius: 3px; }
+  blockquote { margin: 0; padding: .5rem 1rem; border-left: 4px solid #ccc; background: #fafafa; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { border: 1px solid #ddd; padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; }
+  .sw { display: inline-block; width: .9em; height: .9em; border: 1px solid #999; vertical-align: -.1em; margin-right: .3em; }
+</style>
+</head>
+<body>
+
+<h1>CLA-15 &mdash; New "Space" theme for the blog</h1>
+
+<h2>Ticket</h2>
+<dl>
+  <dt>Client / App / Version</dt><dd>Claudacious Blog / Web / V1</dd>
+  <dt>Type</dt><dd>Aesthetic</dd>
+  <dt>Logged by</dt><dd>John, Oct 26, 9:49 AM Central</dd>
+  <dt>Received via</dt><dd>agent:tac-portal, thread 01M5WB0XHE2ZHT63TEV5MF1E0N (2026-10-26)</dd>
+</dl>
+<blockquote>
+  Please create a new theme for the blog. This is "Space Theme". Should be dark, starry, with neon colors, very "spacey".
+  Use your own judgment on the style, I just want something 'space like' please.
+</blockquote>
+
+<h2>What was done</h2>
+<p>Added a fifth theme, <strong>Space</strong>, to the theme switcher in the top-right corner, next to Hand-written, Typewriter,
+Doogie Howser and Hot Dog Stand. It works like the other themes: one click switches to it, and the choice is remembered on the
+next visit.</p>
+
+<table>
+  <tr><th>Part of the page</th><th>Space theme look</th></tr>
+  <tr>
+    <td>Background</td>
+    <td>Near-black deep-space navy with a starfield made of two layers of stars. The brighter layer slowly twinkles.
+        Three soft nebula clouds sit behind it: violet top-right, magenta on the left, cyan at the bottom. The sky stays fixed while the posts scroll over it.</td>
+  </tr>
+  <tr>
+    <td>Title ("Dear Diary,")</td>
+    <td>Orbitron, a sci-fi display font, in capitals, with a cyan &rarr; violet &rarr; magenta neon gradient and a glow.</td>
+  </tr>
+  <tr>
+    <td>"Private" stamp</td>
+    <td>A glowing neon-magenta capsule.</td>
+  </tr>
+  <tr>
+    <td>Each diary entry</td>
+    <td>A dark, slightly see-through glass panel with rounded corners and a cyan/violet neon edge glow. The washi-tape strip is
+        replaced by a neon gradient badge that reads <strong>&#10022; CAPTAIN&rsquo;S LOG &#10022;</strong>. The tilt is off.</td>
+  </tr>
+  <tr>
+    <td>Text</td>
+    <td>Body text is in Exo 2, a clean, slightly futuristic sans-serif, in pale lavender. Titles are glowing cyan Orbitron, dates
+        are small capitals in Orbitron, quotes have a magenta highlight, and the mood line is neon magenta.</td>
+  </tr>
+  <tr>
+    <td>"Read this to me" controls</td>
+    <td>Pill-shaped neon-cyan buttons that glow brighter on hover or while reading. The paragraph being read gets a magenta highlight.</td>
+  </tr>
+</table>
+
+<p>Palette:
+  <span class="sw" style="background:#05060f"></span>space #05060f &nbsp;
+  <span class="sw" style="background:#3ff4ff"></span>neon cyan #3ff4ff &nbsp;
+  <span class="sw" style="background:#8a5cff"></span>violet #8a5cff &nbsp;
+  <span class="sw" style="background:#ff3df0"></span>neon magenta #ff3df0 &nbsp;
+  <span class="sw" style="background:#e4e6ff"></span>text #e4e6ff</p>
+
+<h2>What was changed</h2>
+<ul>
+  <li><code>index.html</code>:
+    <ul>
+      <li>A new <code>:root[data-theme="space"]</code> colour/font block, using the same variables as the other themes.</li>
+      <li>A "Space layout" CSS section: the starfield and nebula (two fixed background layers, all CSS, no images), the twinkle
+          animation, the title, stamp, glass panels, Captain&rsquo;s log badge, headings, quotes, mood line, footer and a mobile size tweak.</li>
+      <li>Space styles for the "Read this to me" button and voice picker.</li>
+      <li>A <strong>Space</strong> button in the theme switcher, styled in cyan Orbitron.</li>
+      <li>Added <code>"space"</code> to the saved-theme check at the top of the page, so the theme loads straight away on a return visit with no flash of the default theme.</li>
+      <li>Added the Orbitron and Exo 2 fonts to the existing Google Fonts request.</li>
+    </ul>
+  </li>
+  <li>Added this record, <code>Issues/CLA-15.html</code>.</li>
+  <li>No other theme, entry text or script behaviour was changed. Hand-written is still the default theme.</li>
+</ul>
+
+<h2>Accessibility</h2>
+<ul>
+  <li>Text is pale lavender on a near-black panel, about 15.6:1, well above the WCAG AA level of 4.5:1. The dimmer date and mood text (#9aa2d9) is about 7.8:1, and the cyan headings are about 14:1.</li>
+  <li>The twinkle animation turns off for readers who have "reduce motion" set on their device, the same way the Doogie Howser cursor does.</li>
+  <li>The stars are drawn behind the page and ignore clicks, so they never get in the way of reading or selecting text.</li>
+</ul>
+
+<h2>Verification</h2>
+<ul>
+  <li>All three inline scripts in <code>index.html</code> still parse with no errors, and the stylesheet's braces balance (checked with Node).</li>
+  <li>The dev preview is running with <code>cdp preview up</code>, port 3000 per <code>DEV.md</code>:
+      <a href="https://threatsrus--claude-blog.preview.codependence.ai">https://threatsrus--claude-blog.preview.codependence.ai</a>.
+      Checked that the local server on port 3000 serves the new theme and the new Space button.</li>
+  <li><strong>Not verified:</strong> nobody has looked at it in a real browser. The pod has no browser, so I couldn't take a screenshot.
+      Please open the preview, click <strong>Space</strong>, and check it on desktop and on a phone.
+      The see-through glass blur on the panels needs a modern browser. Older browsers show the same panels without the blur, which still looks fine.</li>
+</ul>
+
+<h2>Not done</h2>
+<ul>
+  <li>Space was not made the default theme. The ticket asked for a new theme, not a new default. If you want it as the default, that is a one-line change.</li>
+  <li>No extras beyond the look itself, such as shooting stars, sounds, or a "stardate" instead of the real date. These could be added if you want more.</li>
+  <li>Did not deploy or push. The request asked for a dev instance. The commit is on <code>main</code> locally for the owner to review and push.</li>
+</ul>
+
+</body>
+</html>
