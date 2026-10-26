@@ -676,16 +676,40 @@
         }
       }
 
-      // Split an entry into short pieces: Chrome stops long utterances after about 15 seconds.
+      // Split an entry into short pieces: Chrome stops long utterances after about 15 seconds,
+      // and 220 characters can take longer than that, so pieces stay at 160 or fewer (about 10 seconds).
+      var MAX_PIECE = 160;
+
+      // A single sentence longer than MAX_PIECE is broken at commas/dashes, then at spaces.
+      function shorten(sentence) {
+        if (sentence.length <= MAX_PIECE) return [sentence];
+        var parts = sentence.match(/[^,;:—–]+[,;:—–]*\s*/g) || [sentence];
+        var out = [];
+        for (var i = 0; i < parts.length; i++) {
+          var p = parts[i];
+          while (p.length > MAX_PIECE) {
+            var cut = p.lastIndexOf(" ", MAX_PIECE - 1);
+            if (cut <= 0) cut = MAX_PIECE - 1;
+            out.push(p.slice(0, cut + 1));
+            p = p.slice(cut + 1);
+          }
+          if (p) out.push(p);
+        }
+        return out;
+      }
+
       function pieces(entry) {
         var out = [];
         var blocks = entry.querySelectorAll("h2, p:not(.date)");
         for (var i = 0; i < blocks.length; i++) {
           var text = blocks[i].textContent.replace(/\s+/g, " ").trim();
-          var sentences = text.match(/[^.!?]+[.!?]+["”']*\s*|[^.!?]+$/g) || [text];
+          var sentences = [];
+          (text.match(/[^.!?]+[.!?]+["”']*\s*|[^.!?]+$/g) || [text]).forEach(function (s) {
+            sentences = sentences.concat(shorten(s));
+          });
           var chunk = "";
           for (var j = 0; j < sentences.length; j++) {
-            if (chunk && chunk.length + sentences[j].length > 220) {
+            if (chunk && chunk.length + sentences[j].length > MAX_PIECE) {
               out.push({ el: blocks[i], text: chunk });
               chunk = "";
             }
@@ -696,6 +720,10 @@
         return out;
       }
 
+      // Desktop Chrome/Edge also go silent mid-queue on their own; a pause+resume every few seconds
+      // keeps the engine awake. On Android pause() ends speech instead, so it isn't used there.
+      var keepAwake = /Chrome|Chromium|Edg\//.test(navigator.userAgent) && !/Android/i.test(navigator.userAgent);
+
       function clearHighlight() {
         var lit = document.querySelectorAll(".entry .reading");
         for (var i = 0; i < lit.length; i++) lit[i].classList.remove("reading");
@@ -703,41 +731,71 @@
 
       function stop() {
         runs++; // any callbacks from the old run are now ignored
+        var wasBusy = synth.speaking || synth.pending;
         synth.cancel();
         clearHighlight();
         if (playing) {
+          clearInterval(playing.timer);
           playing.button.setAttribute("aria-pressed", "false");
           playing.button.textContent = "▶ Read this to me";
           playing = null;
         }
+        return wasBusy;
       }
 
+      // Pieces are spoken one at a time, each queued when the previous one ends. Queuing a whole
+      // post at once let Chrome drop the rest of the queue, and an utterance nothing in the page
+      // still points to can be garbage-collected mid-sentence, so the one being spoken is kept on
+      // `playing.utterance`.
       function play(entry, button) {
-        stop();
+        var wasBusy = stop();
         var run = runs;
         var list = pieces(entry);
         var uri = savedVoice();
         var voice = null;
         for (var i = 0; i < voices.length; i++) if (voices[i].voiceURI === uri) voice = voices[i];
 
-        playing = { button: button };
+        var state = playing = { button: button, utterance: null, next: 0, ticks: 0 };
         button.setAttribute("aria-pressed", "true");
         button.textContent = "■ Stop reading";
 
-        list.forEach(function (piece, n) {
+        function speakNext() {
+          if (run !== runs) return;
+          if (state.next >= list.length) { stop(); return; }
+          var piece = list[state.next++];
           var u = new SpeechSynthesisUtterance(piece.text);
           u.lang = voice ? voice.lang : (document.documentElement.lang || "en");
           if (voice) u.voice = voice;
           u.onstart = function () {
-            if (run !== runs) return;
+            if (run !== runs || state.utterance !== u) return;
             clearHighlight();
             piece.el.classList.add("reading");
           };
+          // An error on one piece (e.g. a network voice hiccup) skips to the next piece instead of ending the post.
           u.onend = u.onerror = function () {
-            if (run === runs && n === list.length - 1) stop();
+            if (run === runs && state.utterance === u) speakNext();
           };
+          state.utterance = u;
+          state.ticks = 0;
+          synth.resume(); // a speech engine left paused (e.g. by a backgrounded tab) ignores new speech
           synth.speak(u);
-        });
+        }
+
+        // Watchdog: if the engine goes quiet without telling us (no end event), move on to the next piece;
+        // on desktop Chromium, also nudge it with pause+resume so it doesn't stop on its own.
+        state.timer = setInterval(function () {
+          if (run !== runs) return;
+          if (!synth.speaking && !synth.pending) {
+            if (++state.ticks >= 2) speakNext(); // quiet for two checks in a row: the end event was lost
+            return;
+          }
+          state.ticks = 0;
+          if (keepAwake && !synth.paused) { synth.pause(); synth.resume(); }
+        }, 5000);
+
+        // Chrome can silently drop speech queued straight after cancel(), so give it a moment first.
+        if (wasBusy) setTimeout(speakNext, 150);
+        else speakNext();
       }
 
       for (var i = 0; i < entries.length; i++) {

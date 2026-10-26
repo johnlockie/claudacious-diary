@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLA-14 &mdash; "Read this to me" randomly stops playing</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; }
+  dt { font-weight: 600; }
+  dd { margin: 0 0 .5rem 0; }
+  code { background: #f3f3f3; padding: 0 .25rem; border-radius: 3px; }
+  blockquote { margin: 0; padding: .5rem 1rem; border-left: 4px solid #ccc; background: #fafafa; }
+  table { border-collapse: collapse; width: 100%; font-size: .95rem; }
+  th, td { border: 1px solid #ddd; padding: .35rem .5rem; text-align: left; vertical-align: top; }
+  th { background: #f6f6f6; }
+</style>
+</head>
+<body>
+
+<h1>CLA-14 &mdash; "Read this to me" randomly stops playing</h1>
+
+<h2>Ticket</h2>
+<dl>
+  <dt>Client / App / Version</dt><dd>Claudacious Blog / Web / V1</dd>
+  <dt>Type</dt><dd>Bug</dd>
+  <dt>Logged by</dt><dd>John, Oct 25, 11:15 PM Central</dd>
+  <dt>Received via</dt><dd>agent:tac-portal, thread 01M5V6RPKNXGHY9J755AYJ3PPR (2026-10-26)</dd>
+  <dt>Related</dt><dd>CLA-13 (added the "Read this to me" button)</dd>
+</dl>
+<blockquote>
+  I notice with the new read to me feature (the voice feature) that the browser randomly stops playing the audio.
+  I think this is a bug, can you check?
+</blockquote>
+
+<h2>Finding</h2>
+<p>Yes, this is a bug in the CLA-13 code, not something wrong with your browser. The feature uses the browser's built-in
+speech engine (Web Speech API). That engine has several known quirks, mostly in Chrome and Edge, and the CLA-13 code was exposed
+to most of them. Any one of them makes the reading stop partway through with no error, which is why it seemed random.</p>
+
+<table>
+  <tr><th>Cause</th><th>What went wrong in CLA-13</th><th>Fix in CLA-14</th></tr>
+  <tr>
+    <td>Whole post queued at once</td>
+    <td>Every piece of the post was handed to the speech engine at once. Chrome sometimes drops the rest of a long queue,
+        so the reading stopped mid-post.</td>
+    <td>Pieces are now spoken one at a time. The next piece is queued only when the previous one finishes.</td>
+  </tr>
+  <tr>
+    <td>Speech objects garbage-collected</td>
+    <td>The page kept no reference to the queued speech objects. Chrome can clean up an object nothing points to while it is
+        still being spoken. When that happens, the speech cuts off or the "finished" signal never arrives.</td>
+    <td>The piece being spoken is kept on the playback state until it ends.</td>
+  </tr>
+  <tr>
+    <td>Pieces too long</td>
+    <td>Pieces could be up to 220 characters. That is about 15 seconds of speech, right at the point where Chrome is known to stop
+        an utterance. A very long sentence with no full stop could also be longer than 220 characters.</td>
+    <td>Pieces are now 160 characters or fewer (about 10 seconds). Long sentences are split at commas or dashes, or at a space if needed.</td>
+  </tr>
+  <tr>
+    <td>Engine falls asleep</td>
+    <td>Desktop Chrome and Edge can stop speaking on their own during long readings.</td>
+    <td>On desktop Chrome and Edge, a pause followed by an immediate resume every 5 seconds keeps the engine awake. This is the standard workaround.
+        It is turned off on Android, where pausing ends the speech.</td>
+  </tr>
+  <tr>
+    <td>Lost "finished" signal</td>
+    <td>If the engine went quiet without saying it had finished, nothing would start the next piece.</td>
+    <td>A watchdog checks every 5 seconds. If the engine has been silent for two checks in a row, it moves on to the next piece.</td>
+  </tr>
+  <tr>
+    <td>One bad piece ended the whole post</td>
+    <td>A speech error on any one piece (for example, a network hiccup with Google's or Edge's online voices) was not handled.</td>
+    <td>An error on one piece now skips to the next piece. Stopping only happens when you press Stop or the post ends.</td>
+  </tr>
+  <tr>
+    <td>Starting right after stopping</td>
+    <td>Switching posts, or changing the voice while a post was playing, cancelled the old speech and queued new speech straight away.
+        Chrome sometimes silently drops speech queued that quickly after a cancel.</td>
+    <td>Waits 150 ms after a cancel before speaking. Also resumes the engine first in case a backgrounded tab left it paused.</td>
+  </tr>
+</table>
+
+<h2>What was changed</h2>
+<ul>
+  <li><code>index.html</code>, the "Read this to me" script only. The changes are the <code>shorten</code>, <code>pieces</code>, <code>stop</code> and <code>play</code> functions plus a new <code>keepAwake</code> flag.
+      The buttons, voice picker, saved voice, highlighting, styles and themes all work the same as before.</li>
+  <li>Added this record, <code>Issues/CLA-14.html</code>.</li>
+</ul>
+
+<h2>Verification</h2>
+<ul>
+  <li>All three inline scripts in <code>index.html</code> parse with no errors (checked with Node).</li>
+  <li>Ran the new text splitting against all 13 entries (77 text blocks, now 119 pieces). No text was dropped or reordered, and the longest piece is
+      160 characters. Also tested a made-up 900-character sentence: it split into pieces of 160 characters or fewer and nothing was lost.</li>
+  <li>Simulated playback in Node with a fake speech engine and fake timers. These cases all behaved correctly:
+    <ul>
+      <li>A normal read to the end: every piece played in order, and the button reset and the timers cleared at the end.</li>
+      <li>A lost "finished" signal: the watchdog picked up the next piece about 9 seconds later.</li>
+      <li>An error partway through: it skipped to the next piece and finished the post.</li>
+      <li>Pressing Stop: the reading stopped and nothing more was queued.</li>
+      <li>Starting a second post mid-read: the first stopped and the second played in full after the 150 ms delay.</li>
+    </ul>
+  </li>
+  <li>The dev preview is running with <code>cdp preview up</code>, port 3000 per <code>DEV.md</code>:
+      <a href="https://threatsrus--claude-blog.preview.codependence.ai">https://threatsrus--claude-blog.preview.codependence.ai</a>.
+      Checked that the local server on port 3000 serves the new code. The pod couldn't load the public preview URL itself, so it is still worth opening it once to check.</li>
+  <li><strong>Not verified:</strong> nobody has listened to it in a real browser. The pod has no browser or audio. The causes above are known
+      browser-engine issues, but I couldn't reproduce the exact one you hit. Please listen to a long post (for example, the first entry) from start
+      to finish in the browser where you saw the problem. Desktop Chrome or Edge are the most likely places to see it.</li>
+</ul>
+
+<h2>Known limits (not fixed)</h2>
+<ul>
+  <li>Phones may still stop reading when the screen locks or you switch apps. The operating system does that to background web pages,
+      and a web page can't prevent it. Press play again to restart the post.</li>
+  <li>On desktop Chrome and Edge, the pause-and-resume that keeps the engine awake might cause a very short gap in some voices. If it is noticeable,
+      tell us and we can tune it.</li>
+  <li>The only way to get fully reliable playback on every device is pre-recorded audio files (the hosted-voice option described in CLA-13). That is still
+      a separate decision and was not done here.</li>
+  <li>Did not deploy or push. The request asked for a dev instance. The commit is on <code>main</code> locally for the owner to review and push.</li>
+</ul>
+
+</body>
+</html>
