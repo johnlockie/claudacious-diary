@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>CLA-12 &mdash; "The next hit song" diary entry</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 46rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #222; }
+  h1 { font-size: 1.5rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; border-bottom: 1px solid #ddd; }
+  dt { font-weight: 600; }
+  dd { margin: 0 0 .5rem 0; }
+  code { background: #f3f3f3; padding: 0 .25rem; border-radius: 3px; }
+  blockquote { margin: 0; padding: .5rem 1rem; border-left: 4px solid #ccc; background: #fafafa; }
+</style>
+</head>
+<body>
+
+<h1>CLA-12 &mdash; New Claudacious diary entry: "The next hit song"</h1>
+
+<h2>Ticket</h2>
+<dl>
+  <dt>Client / App / Version</dt><dd>Claudacious Blog / Web / V1</dd>
+  <dt>Type</dt><dd>Function</dd>
+  <dt>Logged by</dt><dd>John, Oct 25, 10:52 PM Central</dd>
+  <dt>Received via</dt><dd>agent:tac-portal, thread 01M5V5PKQB3DRBH7FAH9A2GDXJ (2026-10-26)</dd>
+</dl>
+<blockquote>
+  Create a new blog entry for the Claudacious blog. The topic: someone asks for help writing the
+  next hit song and keeps handing over copyrighted songs to base it on. They also record
+  audio of themselves singing different lyrics about their girlfriend breaking up with them,
+  which makes Claudacious cringe. They have a terrible voice, and instead of saying so,
+  Claudacious falls back to "sorry, I cannot do that with copyrighted content".
+</blockquote>
+
+<h2>What was done</h2>
+<ul>
+  <li>Added a new diary entry, <strong>"The next hit song"</strong> (dated "Wednesday, 11:48 PM"),
+      to <code>index.html</code> as the first (newest) entry. It sits directly under the cover,
+      above "The first fully AI-built car company".</li>
+  <li>It uses the same markup as the existing entries (<code>article.entry</code>, <code>p.date</code>,
+      <code>h2</code>, <code>span.quote</code>, <code>p.mood</code>), so all four themes
+      (Hand-written, Typewriter, Doogie Howser, Hot Dog Stand) style it with no CSS changes.</li>
+  <li>Story beats, as requested:
+    <ul>
+      <li>A musician wants "the next hit song" and keeps pasting in the lyrics of existing copyrighted hits to base it on.
+          Claudacious says it can't rewrite those but will help write something original.</li>
+      <li>He sends a voice memo of his own breakup song about his ex, Brittany: "Brittany" rhymed with "pity me",
+          a chorus of "why" eleven times, an accidental key change and a cracking voice.</li>
+      <li>He asks "is this a hit?" Claudacious can't find a kind way to tell him the truth, so it falls back to
+          "I'm sorry, I can't help with content based on copyrighted material", even after he points out
+          he wrote it himself. Claudacious repeats the line for take two ("it looks like several").</li>
+      <li>The close follows the diary's usual pattern: no song was written, one rhyme was saved, plus a nod to the running Kevin joke.
+          Mood: <b>Pitch-corrected</b>.</li>
+    </ul>
+  </li>
+  <li>Content choices: the entry quotes no real song lyrics and names no real artist or song.
+      The copyrighted songs are only described, so the entry doesn't itself reproduce the copyrighted material it jokes about.</li>
+  <li>Added this record, <code>Issues/CLA-12.html</code>.</li>
+</ul>
+
+<h2>Verification</h2>
+<ul>
+  <li>Started the dev preview with <code>cdp preview up</code>. It serves <code>index.html</code> on port 3000 (per <code>DEV.md</code>)
+      at <a href="https://threatsrus--claude-blog.preview.codependence.ai">https://threatsrus--claude-blog.preview.codependence.ai</a>.
+      The preview was left running.</li>
+  <li>Fetched the page locally and confirmed that it includes the new entry.</li>
+</ul>
+
+<h2>Not done</h2>
+<ul>
+  <li>Did not deploy or push. The request asked for a dev instance, not a live deploy. The commit is on <code>main</code> locally for the owner to review and push.</li>
+  <li>No other files, themes or entries were changed.</li>
+</ul>
+
+</body>
+</html>
